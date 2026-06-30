@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>kasumi KEY get</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root{--bg:#0a0a0f;--fg:#e8e8f0;--muted:#5a5a72;--accent:#00ffaa;--accent2:#00ccff;--card:rgba(18,18,28,.85);--border:rgba(0,255,170,.15);--danger:#ff2255;--warn:#ffaa00;--yellow:#ffcc00}
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-user-select:none;-moz-user-select:none;user-select:none}
+        body{font-family:'JetBrains Mono',monospace;background:var(--bg);color:var(--fg);min-height:100vh;overflow-y:auto;position:relative}
+        .grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(0,255,170,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,170,.03) 1px,transparent 1px);background-size:60px 60px;z-index:0}
+        .scanline{position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.08) 2px,rgba(0,0,0,.08) 4px);pointer-events:none;z-index:100}
+        .glow-blob{position:fixed;border-radius:50%;filter:blur(120px);opacity:.4;pointer-events:none;z-index:0}
+        .blob-1{width:500px;height:500px;background:radial-gradient(circle,rgba(0,255,170,.3),transparent 70%);top:-150px;left:-100px;animation:bf1 12s ease-in-out infinite}
+        .blob-2{width:400px;height:400px;background:radial-gradient(circle,rgba(0,204,255,.2),transparent 70%);bottom:-100px;right:-80px;animation:bf2 15s ease-in-out infinite}
+        .blob-3{width:300px;height:300px;background:radial-gradient(circle,rgba(0,255,170,.15),transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);animation:bp 8s ease-in-out infinite}
+        @keyframes bf1{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(80px,60px) scale(1.1)}66%{transform:translate(-40px,30px) scale(.95)}}
+        @keyframes bf2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-60px,-50px) scale(1.15)}}
+        @keyframes bp{0%,100%{opacity:.15;transform:translate(-50%,-50%) scale(1)}50%{opacity:.35;transform:translate(-50%,-50%) scale(1.3)}}
+        .floating-title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(2.2rem,6vw,4.5rem);text-align:center;animation:tf 6s ease-in-out infinite}
+        .floating-title .l1{display:block;color:var(--fg);letter-spacing:.08em}
+        .floating-title .l2{display:block;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:.15em;font-size:.65em;margin-top:.15em}
+        @keyframes tf{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+        .glitch-wrap{position:relative}
+        .glitch-wrap::before,.glitch-wrap::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;height:100%;font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(2.2rem,6vw,4.5rem);text-align:center;pointer-events:none;line-height:1.3}
+        .glitch-wrap::before{color:var(--accent);clip-path:inset(0 0 65% 0);animation:gt 4s ease-in-out infinite;opacity:.7}
+        .glitch-wrap::after{color:var(--danger);clip-path:inset(65% 0 0 0);animation:gb 3.5s ease-in-out infinite;opacity:.7}
+        @keyframes gt{0%,92%,100%{transform:translate(0)}93%{transform:translate(-4px,-2px)}95%{transform:translate(3px,1px)}97%{transform:translate(-2px,0)}}
+        @keyframes gb{0%,88%,100%{transform:translate(0)}89%{transform:translate(3px,2px)}91%{transform:translate(-4px,-1px)}94%{transform:translate(2px,0)}}
+        .btn-getkey{position:relative;font-family:'Orbitron',sans-serif;font-weight:700;font-size:1.1rem;letter-spacing:.2em;padding:16px 48px;border:2px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;overflow:hidden;transition:all .4s cubic-bezier(.23,1,.32,1)}
+        .btn-getkey::before{content:'';position:absolute;inset:0;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .4s cubic-bezier(.23,1,.32,1);z-index:-1}
+        .btn-getkey:hover::before{transform:scaleX(1)}
+        .btn-getkey:hover{color:var(--bg);box-shadow:0 0 40px rgba(0,255,170,.3),0 0 80px rgba(0,255,170,.1)}
+        .btn-getkey:active{transform:scale(.96)}
+        .btn-getkey.loading{pointer-events:none;border-color:var(--muted);color:var(--muted)}
+        .btn-getkey.dead{pointer-events:none;border-color:var(--danger);color:var(--danger);opacity:.5;cursor:default}
+        .key-frame{background:var(--card);border:1px solid var(--border);backdrop-filter:blur(20px);border-radius:12px;max-width:560px;width:100%;overflow:hidden;opacity:0;transform:translateY(30px) scale(.95);transition:all .6s cubic-bezier(.23,1,.32,1)}
+        .key-frame.visible{opacity:1;transform:translateY(0) scale(1)}
+        .kf-h{display:flex;align-items:center;gap:8px;padding:12px 16px;background:rgba(0,255,170,.05);border-bottom:1px solid var(--border)}
+        .kfd{width:10px;height:10px;border-radius:50%}
+        .kf-h .t{margin-left:8px;font-size:.75rem;color:var(--muted);letter-spacing:.1em}
+        .kf-b{padding:28px 24px;text-align:center}
+        .kl{font-size:.7rem;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-bottom:12px}
+        .kv{font-size:clamp(.85rem,2.5vw,1.05rem);color:var(--accent);word-break:break-all;font-weight:700;letter-spacing:.04em;text-shadow:0 0 20px rgba(0,255,170,.25);min-height:1.4em}
+        .kf-f{padding:12px 16px;border-top:1px solid var(--border)}
+        .btn-copy{width:100%;font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;padding:14px 20px;border:1px solid var(--accent);background:rgba(0,255,170,.08);color:var(--accent);cursor:pointer;border-radius:8px;transition:all .3s ease;display:flex;align-items:center;justify-content:center;gap:8px}
+        .btn-copy:hover{background:rgba(0,255,170,.18);box-shadow:0 0 20px rgba(0,255,170,.15)}
+        .btn-copy:active{transform:scale(.97)}
+        .spinner{display:inline-block;width:18px;height:18px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:sp .8s linear infinite}
+        @keyframes sp{to{transform:rotate(360deg)}}
+        .particle{position:fixed;border-radius:50%;pointer-events:none;z-index:1;opacity:0}
+        @keyframes pd{0%,100%{transform:translate(0,0);opacity:0}10%{opacity:.4}50%{transform:translate(var(--dx),var(--dy));opacity:.3}90%{opacity:.4}}
+
+        /* === Hồ sơ === */
+        .profile-btn{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);font-size:.6rem;color:var(--muted);letter-spacing:.12em;opacity:.35;z-index:10;cursor:pointer;background:none;border:none;font-family:inherit;transition:opacity .3s ease}
+        .profile-btn:hover{opacity:.8}
+        .profile-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;opacity:0;pointer-events:none;transition:opacity .3s ease;backdrop-filter:blur(4px)}
+        .profile-overlay.open{opacity:1;pointer-events:all}
+        .profile-panel{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:520px;z-index:301;background:var(--card);border:1px solid var(--border);border-bottom:none;border-radius:16px 16px 0 0;backdrop-filter:blur(20px);transition:transform .4s cubic-bezier(.23,1,.32,1);padding:0}
+        .profile-panel.open{transform:translateX(-50%) translateY(0)}
+        .profile-handle{width:40px;height:4px;background:var(--muted);border-radius:4px;margin:12px auto 0;opacity:.4}
+        .profile-header{padding:16px 24px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+        .profile-header h2{font-family:'Orbitron',sans-serif;font-size:.85rem;letter-spacing:.15em;color:var(--fg)}
+        .profile-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;transition:color .2s ease;padding:4px 8px}
+        .profile-close:hover{color:var(--danger)}
+        .profile-body{padding:20px 24px 32px}
+        .p-row{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px}
+        .p-row:last-child{margin-bottom:0}
+        .p-label{font-size:.6rem;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;min-width:80px;padding-top:3px;flex-shrink:0}
+        .p-val{font-size:.78rem;word-break:break-all;line-height:1.6;flex:1}
+        .p-val.id-val{color:var(--fg);font-weight:700}
+        .p-val.api-val{color:var(--accent2);font-weight:700;letter-spacing:.06em}
+        .p-val.url-val{color:var(--yellow);font-size:.68rem}
+        .p-val.status-val{font-weight:700}
+        .p-val.status-active{color:var(--accent)}
+        .p-val.status-black{color:var(--danger)}
+        .p-sep{height:1px;background:var(--border);margin:16px 0}
+        .p-note{font-size:.6rem;color:var(--muted);opacity:.6;line-height:1.5;margin-top:8px}
+
+        /* === Crash / 404 / Refused === */
+        .crash-overlay{position:fixed;inset:0;z-index:150;pointer-events:none;opacity:0}
+        .crash-overlay.active{animation:cg .8s steps(8) forwards}
+        @keyframes cg{0%{opacity:0;background:rgba(255,34,85,0)}10%{opacity:1;background:rgba(255,34,85,.3);transform:translate(-5px,3px) skewX(2deg)}20%{opacity:1;background:rgba(0,255,170,.2);transform:translate(4px,-2px) skewX(-1deg)}30%{opacity:1;background:rgba(255,34,85,.4);transform:translate(-8px,5px) skewX(3deg)}40%{opacity:0;background:rgba(0,0,0,.8);transform:none}50%{opacity:1;background:rgba(255,34,85,.6);transform:translate(6px,-4px) skewX(-2deg)}60%{opacity:0}70%{opacity:1;background:rgba(255,34,85,.3);transform:translate(-3px,2px)}80%{opacity:0}90%{opacity:1;background:rgba(255,34,85,.5)}100%{opacity:0;background:transparent;transform:none}}
+        .page-404{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);opacity:0;pointer-events:none;transition:opacity .3s ease}
+        .page-404.active{opacity:1;pointer-events:all}
+        .f-o-f{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(6rem,20vw,14rem);color:transparent;-webkit-text-stroke:2px var(--danger);position:relative;animation:ep 2s ease-in-out infinite}
+        .f-o-f::after{content:'404';position:absolute;inset:0;color:var(--danger);opacity:.08;font-size:1.6em;filter:blur(30px)}
+        @keyframes ep{0%,100%{filter:drop-shadow(0 0 10px rgba(255,34,85,.3))}50%{filter:drop-shadow(0 0 30px rgba(255,34,85,.6))}}
+        .em{font-size:1rem;color:var(--muted);margin-top:16px;letter-spacing:.15em}
+        .es{font-size:.75rem;color:rgba(255,34,85,.5);margin-top:8px;letter-spacing:.08em}
+        .uid-box{margin-top:32px;padding:14px 24px;border:1px solid rgba(255,34,85,.2);border-radius:8px;background:rgba(255,34,85,.04)}
+        .uid-label{font-size:.6rem;color:var(--muted);letter-spacing:.2em;margin-bottom:6px}
+        .uid-value{font-size:.8rem;color:var(--danger);letter-spacing:.06em;opacity:.8}
+        .refused-box{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);opacity:0;pointer-events:none;transition:opacity .3s ease}
+        .refused-box.active{opacity:1;pointer-events:all}
+        .refused-icon{font-size:4rem;color:var(--danger);margin-bottom:20px;animation:ep 2s ease-in-out infinite}
+        .blocked-toast{position:fixed;top:24px;left:50%;transform:translateX(-50%) translateY(-80px);background:rgba(255,34,85,.15);border:1px solid rgba(255,34,85,.4);color:var(--danger);padding:10px 24px;border-radius:8px;font-size:.8rem;letter-spacing:.1em;z-index:999;backdrop-filter:blur(12px);transition:transform .4s cubic-bezier(.23,1,.32,1),opacity .4s ease;opacity:0;pointer-events:none}
+        .blocked-toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+        .bonus-toast{position:fixed;top:24px;left:50%;transform:translateX(-50%) translateY(-80px);background:rgba(255,170,0,.15);border:1px solid rgba(255,170,0,.4);color:var(--warn);padding:10px 24px;border-radius:8px;font-size:.8rem;letter-spacing:.1em;z-index:999;backdrop-filter:blur(12px);transition:transform .4s cubic-bezier(.23,1,.32,1),opacity .4s ease;opacity:0;pointer-events:none}
+        .bonus-toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+        #noiseCanvas{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.035}
+        .remaining-tag{font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-top:10px;opacity:.6}
+        .remaining-tag span{color:var(--accent);font-weight:700}
+        @media(max-width:640px){.kf-b{padding:20px 16px}.btn-getkey{font-size:.9rem;padding:14px 32px}.profile-body{padding:16px 18px 28px}.p-label{min-width:65px;font-size:.55rem}.p-val{font-size:.7rem}.p-val.url-val{font-size:.6rem}}
+        @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+    <div class="glow-blob blob-1"></div>
+    <div class="glow-blob blob-2"></div>
+    <div class="glow-blob blob-3"></div>
+    <canvas id="noiseCanvas"></canvas>
+    <div class="scanline"></div>
+    <div id="particles"></div>
+    <div class="blocked-toast" id="bt"><i class="fa-solid fa-ban" style="margin-right:6px"></i> HANH DONG BI CHAN</div>
+    <div class="bonus-toast" id="bnt"><i class="fa-solid fa-gift" style="margin-right:6px"></i> LINK4M BONUS +1 GET</div>
+
+    <!-- Nút mở hồ sơ -->
+    <button class="profile-btn" id="profileBtn">[ HOSO ] SID: <span id="stagSid"></span></button>
+
+    <!-- Panel hồ sơ -->
+    <div class="profile-overlay" id="profileOverlay"></div>
+    <div class="profile-panel" id="profilePanel">
+        <div class="profile-handle"></div>
+        <div class="profile-header">
+            <h2><i class="fa-solid fa-id-card" style="margin-right:8px;color:var(--accent2)"></i>HO SO</h2>
+            <button class="profile-close" id="profileClose" aria-label="Dong"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="profile-body">
+            <div class="p-row">
+                <div class="p-label">Session ID</div>
+                <div class="p-val id-val" id="pUid"></div>
+            </div>
+            <div class="p-sep"></div>
+            <div class="p-row">
+                <div class="p-label">API Key</div>
+                <div class="p-val api-val" id="pApiKey"></div>
+            </div>
+            <div class="p-row">
+                <div class="p-label">URL API</div>
+                <div class="p-val url-val" id="pApiUrl"></div>
+            </div>
+            <div class="p-sep"></div>
+            <div class="p-row">
+                <div class="p-label">Trang thai</div>
+                <div class="p-val status-val status-active" id="pStatus">Active</div>
+            </div>
+            <div class="p-row">
+                <div class="p-label">Ngay tao</div>
+                <div class="p-val" id="pCreated" style="color:var(--muted)"></div>
+            </div>
+            <div class="p-note">API Key va URL API la co dinh cho ID nay. Key getkey khong lien quan den API.</div>
+        </div>
+    </div>
+
+    <main id="mc" style="position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;gap:40px">
+        <div class="glitch-wrap" data-text="kasumi&#10;KEY get">
+            <div class="floating-title"><span class="l1">kasumi</span><span class="l2">KEY get</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+            <button class="btn-getkey" id="bgk"><span id="btx">GETKEY</span></button>
+            <div class="remaining-tag" id="rtag">Con lai: <span id="rnum">1</span> lan</div>
+        </div>
+        <div class="key-frame" id="kf">
+            <div class="kf-h"><div class="kfd" style="background:#ff5f57"></div><div class="kfd" style="background:#febc2e"></div><div class="kfd" style="background:#28c840"></div><span class="t">generated_key</span></div>
+            <div class="kf-b">
+                <div class="kl">API Key</div>
+                <div class="kv" id="kd"></div>
+            </div>
+            <div class="kf-f"><button class="btn-copy" id="bc"><i class="fa-regular fa-copy"></i><span>Sao chep</span></button></div>
+        </div>
+    </main>
+
+    <div class="crash-overlay" id="co"></div>
+    <div class="page-404" id="p404">
+        <div class="f-o-f">404</div>
+        <p class="em">KHONG TIM THAY TRANG</p>
+        <p class="es" id="e404s">Key da bi phong se. Truy cap bi tu choi.</p>
+        <div class="uid-box"><div class="uid-label">BLACKLISTED SESSION ID</div><div class="uid-value" id="u404"></div></div>
+    </div>
+    <div class="refused-box" id="rb">
+        <div class="refused-icon"><i class="fa-solid fa-link-slash"></i></div>
+        <div class="f-o-f" style="font-size:clamp(3rem,10vw,6rem)">LINK ERROR</div>
+        <p class="em">LINK KHONG HOP LE</p>
+        <p class="es">Phat hien truy cap qua link chia se. Tu choi.</p>
+        <div class="uid-box"><div class="uid-label">SESSION ID</div><div class="uid-value" id="urb"></div></div>
+    </div>
+
+    <script>
+    (function(){
+        var API_SECRET = "ks9x7mKp2qRw4nL";
+        var API_BASE   = "/.netlify/functions/key-api";
+        var PFX = "kasumi_";
+
+        /* === UUID === */
+        function uuid(){
+            return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,function(c){
+                var r=Math.random()*16|0,v=c==="x"?r:(r&0x3|0x8);return v.toString(16);
+            });
+        }
+
+        /* === API Key 14 ký tự cho ID === */
+        function genIdApiKey(){
+            var c="abcdefghijklmnopqrstuvwxyz0123456789",r="";
+            for(var i=0;i<14;i++) r+=c[Math.floor(Math.random()*c.length)];
+            return r;
+        }
+
+        /* === Lấy hoặc tạo UID === */
+        function getUID(){
+            var h=location.hash.replace("#","");
+            if(h&&h.indexOf("KS-")===0) return h;
+            var n="KS-"+uuid().toUpperCase();
+            history.replaceState(null,"","#"+n);
+            return n;
+        }
+
+        var myUID = getUID();
+
+        /* === Lấy hoặc tạo API Key cho ID (cố định vĩnh viễn) === */
+        function getIdApiKey(){
+            var k=ld("id_api_key");
+            if(k) return k;
+            var nk=genIdApiKey();
+            sv("id_api_key",nk);
+            sv("id_created",new Date().toISOString());
+            /* Đăng ký lên server */
+            registerId(nk);
+            return nk;
+        }
+
+        function registerId(apiKey){
+            fetch(API_BASE,{
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify({secret:API_SECRET,action:"register_id",uid:myUID,api_key:apiKey})
+            }).catch(function(){});
+        }
+
+        /* === LocalStorage helper === */
+        function sv(k,v){try{localStorage.setItem(PFX+myUID+"_"+k,v)}catch(e){}}
+        function ld(k){try{return localStorage.getItem(PFX+myUID+"_"+k)}catch(e){return null}}
+        function isCrashed(){return ld("crashed")==="true"}
+        function setCrashed(){sv("crashed","true")}
+        function getGetsLeft(){var v=ld("gets_left");return v===null?1:(parseInt(v)||0)}
+        function setGetsLeft(n){sv("gets_left",n.toString())}
+        function useOneGet(){var c=getGetsLeft();if(c>0)setGetsLeft(c-1)}
+        function hasL4m(){return ld("l4m")==="true"}
+        function setL4m(){sv("l4m","true")}
+
+        /* === Khởi tạo === */
+        var myApiKey = getIdApiKey();
+        var myApiUrl = "https://kasumigetkey.netlify.app/api/" + myApiKey;
+        var myCreated = ld("id_created") || new Date().toISOString();
+
+        /* Hiện SID trên nút hồ sơ */
+        document.getElementById("stagSid").textContent = myUID;
+
+        /* Điền hồ sơ */
+        document.getElementById("pUid").textContent = myUID;
+        document.getElementById("pApiKey").textContent = myApiKey;
+        document.getElementById("pApiUrl").textContent = myApiUrl;
+        document.getElementById("pCreated").textContent = myCreated.replace("T"," ").replace(/\.\d+Z/,"");
+
+        /* === Mở/đóng hồ sơ === */
+        var profileOverlay = document.getElementById("profileOverlay");
+        var profilePanel = document.getElementById("profilePanel");
+
+        document.getElementById("profileBtn").addEventListener("click",openProfile);
+        document.getElementById("profileClose").addEventListener("click",closeProfile);
+        profileOverlay.addEventListener("click",closeProfile);
+
+        function openProfile(){
+            /* Cập nhật trạng thái */
+            if(isCrashed()){
+                document.getElementById("pStatus").textContent="Blacklisted";
+                document.getElementById("pStatus").className="p-val status-val status-black";
+            }else{
+                document.getElementById("pStatus").textContent="Active";
+                document.getElementById("pStatus").className="p-val status-val status-active";
+            }
+            profileOverlay.classList.add("open");
+            profilePanel.classList.add("open");
+        }
+        function closeProfile(){
+            profileOverlay.classList.remove("open");
+            profilePanel.classList.remove("open");
+        }
+
+        /* === Referrer check === */
+        var ref = document.referrer.toLowerCase();
+        var badD = ["linkhay","linkvip","tinyurl","bit.ly","t.co","fb.com","facebook.com","zalo.me","twitter.com","x.com"];
+        var isBad = false;
+        for(var i=0;i<badD.length;i++){if(ref.indexOf(badD[i])!==-1){isBad=true;break}}
+        var isL4m = ref.indexOf("link4m")!==-1;
+
+        if(isBad){showRefused();return}
+        if(isCrashed()){show404();return}
+
+        if(isL4m && !hasL4m()){
+            setGetsLeft(getGetsLeft()+1);
+            setL4m();
+            setTimeout(showBonusToast,500);
+        }
+
+        updateBtn();
+
+        function updateBtn(){
+            var left=getGetsLeft();
+            document.getElementById("rnum").textContent=left;
+            var bgk=document.getElementById("bgk");
+            if(left<=0){
+                bgk.classList.add("dead");
+                document.getElementById("btx").textContent="EXHAUSTED";
+                document.getElementById("rtag").style.color="var(--danger)";
+            }else{
+                bgk.classList.remove("dead");
+                document.getElementById("btx").textContent="GETKEY";
+                document.getElementById("rtag").style.color="";
+            }
+        }
+
+        /* === Các trang lỗi === */
+        function showRefused(){hideAll();document.getElementById("urb").textContent=myUID;document.getElementById("rb").classList.add("active");setTimeout(silentClose,1500)}
+        function show404(){hideAll();document.getElementById("u404").textContent=myUID;document.getElementById("p404").classList.add("active");setTimeout(silentClose,1200)}
+        function hideAll(){
+            ["mc"].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display="none"});
+            [".grid-bg",".scanline","#noiseCanvas","#particles"].forEach(function(s){var e=document.querySelector(s);if(e)e.style.display="none"});
+            document.querySelectorAll(".glow-blob").forEach(function(b){b.style.display="none"});
+            document.getElementById("profileBtn").style.display="none";
+        }
+        function silentClose(){
+            window.close();
+            setTimeout(function(){try{window.open("about:blank","_self").close()}catch(e){}},200);
+            setTimeout(function(){try{location.replace("about:blank")}catch(e){}},500);
+        }
+
+        /* === Chống sao chép === */
+        document.addEventListener("selectstart",function(e){e.preventDefault();return false},true);
+        document.addEventListener("copy",function(e){e.preventDefault();e.stopPropagation();showBT();return false},true);
+        document.addEventListener("cut",function(e){e.preventDefault();e.stopPropagation();showBT();return false},true);
+        document.addEventListener("dragstart",function(e){e.preventDefault();return false},true);
+        document.addEventListener("drop",function(e){e.preventDefault();return false},true);
+        document.addEventListener("contextmenu",function(e){e.preventDefault();e.stopPropagation();showBT();return false},true);
+        document.addEventListener("keydown",function(e){
+            var a=[e.key==="F12",e.ctrlKey&&/u/i.test(e.key),e.ctrlKey&&e.shiftKey&&/[ijc]/i.test(e.key),e.ctrlKey&&/s/i.test(e.key),e.ctrlKey&&/p/i.test(e.key)];
+            for(var i=0;i<a.length;i++){if(a[i]){e.preventDefault();e.stopPropagation();showBT();return}}
+            if(!isCrashed())return;
+            var b=[e.key==="F5",e.ctrlKey&&/r/i.test(e.key),e.ctrlKey&&/l/i.test(e.key),e.ctrlKey&&/w/i.test(e.key),e.altKey&&e.key==="F4"];
+            for(var j=0;j<b.length;j++){if(b[j]){e.preventDefault();e.stopPropagation();showBT();return}}
+        },true);
+        setInterval(function(){if(!isCrashed())return;if(window.outerWidth-window.innerWidth>160||window.outerHeight-window.innerHeight>160){document.body.innerHTML="";document.body.style.background="#000"}},1000);
+
+        /* === Toast === */
+        var btEl=document.getElementById("bt"),btT=null;
+        function showBT(){btEl.classList.add("show");clearTimeout(btT);btT=setTimeout(function(){btEl.classList.remove("show")},2000)}
+        var bntEl=document.getElementById("bnt"),bntT=null;
+        function showBonusToast(){bntEl.classList.add("show");clearTimeout(bntT);bntT=setTimeout(function(){bntEl.classList.remove("show")},3000)}
+
+        /* === Noise === */
+        var nc=document.getElementById("noiseCanvas"),nx=nc.getContext("2d");
+        function rn(){nc.width=innerWidth;nc.height=innerHeight}rn();addEventListener("resize",rn);
+        (function dn(){if(isCrashed())return;var id=nx.createImageData(nc.width,nc.height),d=id.data;for(var i=0;i<d.length;i+=4){var v=Math.random()*255;d[i]=v;d[i+1]=v;d[i+2]=v;d[i+3]=255}nx.putImageData(id,0,0);requestAnimationFrame(dn)})();
+
+        /* === Particles === */
+        var pc=document.getElementById("particles");
+        for(var i=0;i<35;i++){
+            var p=document.createElement("div");p.className="particle";
+            var s=1+Math.random()*3,dur=8+Math.random()*12;
+            p.style.cssText="left:"+Math.random()*100+"%;top:"+Math.random()*100+"%;width:"+s+"px;height:"+s+"px;animation:pd "+dur+"s "+Math.random()*dur+"s ease-in-out infinite;--dx:"+(30+Math.random()*60)+"px;--dy:"+(-(20+Math.random()*40))+"px;opacity:"+(0.15+Math.random()*.35)+";background:"+(Math.random()>.5?"var(--accent)":"var(--accent2)");
+            pc.appendChild(p);
+        }
+
+        /* === Random key getkey === */
+        function genKey(){
+            var c="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",k="key_";
+            for(var i=0;i<32;i++)k+=c[Math.floor(Math.random()*c.length)];
+            return k;
+        }
+        function typeText(el,text,speed,cb){
+            el.textContent="";var idx=0;
+            var iv=setInterval(function(){el.textContent+=text[idx];idx++;if(idx>=text.length){clearInterval(iv);if(cb)cb()}},speed);
+        }
+
+        /* === Logic GETKEY === */
+        var bgk=document.getElementById("bgk"),btx=document.getElementById("btx");
+        var kf=document.getElementById("kf"),kd=document.getElementById("kd");
+        var bc=document.getElementById("bc"),co=document.getElementById("co");
+        var curKey="",typing=false;
+
+        bgk.addEventListener("click",function(){
+            if(typing||isCrashed())return;
+            if(getGetsLeft()<=0){triggerCrash("QUA SO LUONG GET CHO PHEP");return}
+            typing=true;
+            bgk.classList.add("loading");
+            btx.innerHTML='<span class="spinner"></span> GENERATING...';
+            kf.classList.remove("visible");
+            kd.textContent="";
+            curKey=genKey();
+
+            setTimeout(function(){
+                kf.classList.add("visible");
+                setTimeout(function(){
+                    typeText(kd,curKey,22,function(){
+                        typing=false;
+                        bgk.classList.remove("loading");
+                        useOneGet();
+                        updateBtn();
+                        /* Lưu key lên server (không liên quan API) */
+                        fetch(API_BASE,{
+                            method:"POST",
+                            headers:{"Content-Type":"application/json"},
+                            body:JSON.stringify({secret:API_SECRET,action:"save_key",key:curKey,uid:myUID})
+                        }).catch(function(){});
+                    });
+                },200);
+            },1000+Math.random()*1200);
+        });
+
+        /* === Logic SAO CHÉP === */
+        bc.addEventListener("click",async function(){
+            if(!curKey||isCrashed())return;
+            try{await navigator.clipboard.writeText(curKey)}catch(e){
+                var t=document.createElement("textarea");t.value=curKey;
+                t.style.cssText="position:fixed;opacity:0";document.body.appendChild(t);
+                t.select();document.execCommand("copy");document.body.removeChild(t);
+            }
+            bc.innerHTML='<i class="fa-solid fa-check"></i> <span>Da sao chep!</span>';
+            /* Revoke key trên server */
+            fetch(API_BASE,{
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify({secret:API_SECRET,action:"revoke",key:curKey,uid:myUID})
+            }).catch(function(){});
+            setTimeout(function(){triggerCrash("Key da bi phong se. Truy cap bi tu choi.")},600);
+        });
+
+        function triggerCrash(sub){
+            setCrashed();
+            document.getElementById("e404s").textContent=sub||"Key da bi phong se.";
+            co.classList.add("active");
+            setTimeout(function(){
+                co.classList.remove("active");
+                document.getElementById("mc").style.transition="opacity .4s ease,filter .4s ease";
+                document.getElementById("mc").style.opacity="0";
+                document.getElementById("mc").style.filter="blur(10px)";
+                document.getElementById("profileBtn").style.opacity="0";
+                setTimeout(function(){
+                    hideAll();
+                    document.getElementById("u404").textContent=myUID;
+                    document.getElementById("p404").classList.add("active");
+                    setTimeout(silentClose,1000);
+                },400);
+            },800);
+        }
+    })();
+    </script>
+</body>
+</html>
