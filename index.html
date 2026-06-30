@@ -106,6 +106,8 @@
         .remaining-tag span{color:var(--accent);font-weight:700}
         @media(max-width:640px){.kf-b{padding:20px 16px}.btn-getkey{font-size:.9rem;padding:14px 32px}.profile-body{padding:16px 18px 28px}.p-label{min-width:65px;font-size:.55rem}.p-val{font-size:.7rem}.p-val.url-val{font-size:.6rem}}
         @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+        .dev-btn{position:fixed;top:16px;left:16px;width:24px;height:24px;z-index:300;cursor:pointer;opacity:.04;border:1px solid rgba(255,255,255,.03);border-radius:4px;transition:opacity .3s ease}
+.dev-btn:hover{opacity:.12}
     </style>
 </head>
 <body>
@@ -176,8 +178,9 @@
     </main>
 
     <div class="crash-overlay" id="co"></div>
- <div class="page-404" id="p404">
-    <div class="f-o-f" id="devTrigger" style="cursor:default">404</div>
+<div class="page-404" id="p404">
+    <div class="dev-btn" id="devBtn"></div>
+    <div class="f-o-f">404</div>
     <p class="em">KHONG TIM THAY TRANG</p>
     <p class="es" id="e404s">Key da bi phong se. Truy cap bi tu choi.</p>
     <div class="uid-box"><div class="uid-label">BLACKLISTED SESSION ID</div><div class="uid-value" id="u404"></div></div>
@@ -473,66 +476,30 @@
                 },400);
             },800);
         }
-        /* === DEV MODE: bấm 3 lần vào 404 === */
-var devClicks = 0, devTimer = null;
-var devTrigger = document.getElementById("devTrigger");
-if(devTrigger){
-    devTrigger.addEventListener("click", function(){
-        clearTimeout(devTimer);
-        devTimer = setTimeout(function(){ devClicks = 0; }, 800);
-        devClicks++;
-        if(devClicks >= 3){
-            devClicks = 0;
-            activateDevMode();
-        }
-    });
-}
+        //* === DEV MODE === */
+document.getElementById("devBtn").addEventListener("click", activateDevMode);
 
 function activateDevMode(){
-    /* Xoá flag crashed */
-    try{localStorage.removeItem(PFX + myUID + "_crashed")}catch(e){}
-    /* Set gets_left vô hạn */
+    try{localStorage.removeItem(PFX+myUID+"_crashed")}catch(e){}
     setGetsLeft(999);
-    /* Đánh dấu dev mode */
     sv("dev_mode","true");
-    /* Ẩn 404, hiện lại trang chính */
     document.getElementById("p404").classList.remove("active");
     document.getElementById("p404").style.display="none";
-    /* Hiện lại nền */
-    var showEls=["mc","stag"];
-    showEls.forEach(function(id){var e=document.getElementById(id);if(e)e.style.display=""});
-    var showCls=[".grid-bg",".scanline","#noiseCanvas","#particles"];
-    showCls.forEach(function(s){var e=document.querySelector(s);if(e)e.style.display=""});
+    ["mc","stag"].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display=""});
+    [".grid-bg",".scanline","#noiseCanvas","#particles"].forEach(function(s){var e=document.querySelector(s);if(e)e.style.display=""});
     document.querySelectorAll(".glow-blob").forEach(function(b){b.style.display=""});
     document.getElementById("profileBtn").style.display="";
     document.getElementById("profileBtn").style.opacity="";
-    /* Reset nút */
     updateBtn();
-    /* Thông báo âm thầm */
     console.log("%c[DEV MODE ACTIVATED]","color:#00ffaa;font-size:16px;font-weight:bold");
-    console.log("%cUnlimited GETKEY enabled. Copy safe.","color:#00ffaa");
 }
 
-/* Kiểm tra dev mode khi load */
 if(ld("dev_mode")==="true"){
-    if(isCrashed()){
-        /* Bỏ qua 404, cho phép vào trang chính */
-        isCrashed=function(){return false};
-        setGetsLeft(999);
-        updateBtn();
-        console.log("%c[DEV MODE] Active from previous session","color:#00ffaa");
-    }
+    if(isCrashed()){isCrashed=function(){return false};setGetsLeft(999);updateBtn();console.log("%c[DEV MODE] Active","color:#00ffaa")}
 }
 
-/* Trong dev mode: copy không crash */
-var origTriggerCrash = triggerCrash;
-triggerCrash = function(sub){
-    if(ld("dev_mode")==="true"){
-        console.log("%c[DEV MODE] Crash blocked.","color:#ffaa00");
-        return;
-    }
-    origTriggerCrash(sub);
-};
+var origTC=triggerCrash;
+triggerCrash=function(sub){if(ld("dev_mode")==="true"){console.log("%c[DEV MODE] Crash blocked","color:#ffaa00");return}origTC(sub)};
     })();
     </script>
 </body>
