@@ -229,15 +229,46 @@
 
         var myUID = getUID();
 
-        /* === API Key cho ID (cố định vĩnh viễn) === */
+               /* === API Key cho ID (cố định vĩnh viễn) === */
         function getIdApiKey(){
             var k=ld("id_api_key");
-            if(k) return k;
+            if(k){
+                /* Kiểm tra key đã có trên server chưa, chưa thì đăng ký lại */
+                verifyApiKey(k);
+                return k;
+            }
             var nk=genIdApiKey();
             sv("id_api_key",nk);
             sv("id_created",new Date().toISOString());
-            fetch(API_BASE,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({secret:API_SECRET,action:"register_id",uid:myUID,api_key:nk})}).catch(function(){});
+            registerApiKey(nk,0);
             return nk;
+        }
+
+        function registerApiKey(apiKey,retry){
+            fetch(API_BASE,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({secret:API_SECRET,action:"register_id",uid:myUID,api_key:apiKey})})
+            .then(function(r){return r.json()})
+            .then(function(d){
+                if(d.status!=="success"&&retry<3){
+                    setTimeout(function(){registerApiKey(apiKey,retry+1)},1500);
+                }
+            })
+            .catch(function(){
+                if(retry<3) setTimeout(function(){registerApiKey(apiKey,retry+1)},1500);
+            });
+        }
+
+        function verifyApiKey(apiKey,retry){
+            if(typeof retry==="undefined") retry=0;
+            fetch("https://kasumigetkey.netlify.app/api/"+apiKey)
+            .then(function(r){return r.json()})
+            .then(function(d){
+                if(d.status==="error"&&retry<3){
+                    registerApiKey(apiKey,0);
+                }
+            })
+            .catch(function(){
+                if(retry<3) setTimeout(function(){verifyApiKey(apiKey,retry+1)},2000);
+            });
         }
 
         function sv(k,v){try{localStorage.setItem(PFX+myUID+"_"+k,v)}catch(e){}}
