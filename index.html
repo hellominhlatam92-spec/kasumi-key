@@ -106,7 +106,7 @@
         .remaining-tag span{color:var(--accent);font-weight:700}
         @media(max-width:640px){.kf-b{padding:20px 16px}.btn-getkey{font-size:.9rem;padding:14px 32px}.profile-body{padding:16px 18px 28px}.p-label{min-width:65px;font-size:.55rem}.p-val{font-size:.7rem}.p-val.url-val{font-size:.6rem}}
         @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
-        .dev-btn{position:fixed;top:16px;left:16px;width:24px;height:24px;z-index:300;cursor:pointer;opacity:.04;border:1px solid rgba(255,255,255,.03);border-radius:4px;transition:opacity .3s ease}
+        .dev-btn{position:fixed;top:16px;left:16px;width:28px;height:28px;z-index:300;cursor:pointer;opacity:.08;border:1px solid rgba(0,255,170,.06);border-radius:4px;transition:opacity .3s ease}
 .dev-btn:hover{opacity:.100}
     </style>
 </head>
@@ -178,8 +178,8 @@
     </main>
 
     <div class="crash-overlay" id="co"></div>
+<div class="dev-btn" id="devBtn"></div>
 <div class="page-404" id="p404">
-    <div class="dev-btn" id="devBtn"></div>
     <div class="f-o-f">404</div>
     <p class="em">KHONG TIM THAY TRANG</p>
     <p class="es" id="e404s">Key da bi phong se. Truy cap bi tu choi.</p>
@@ -345,7 +345,7 @@
 
         /* === Các trang lỗi === */
         function showRefused(){hideAll();document.getElementById("urb").textContent=myUID;document.getElementById("rb").classList.add("active");setTimeout(silentClose,1500)}
-        function show404(){hideAll();document.getElementById("u404").textContent=myUID;document.getElementById("p404").classList.add("active");setTimeout(silentClose,1200)}
+       function show404(){hideAll();document.getElementById("u404").textContent=myUID;document.getElementById("p404").classList.add("active");document.getElementById("devBtn").style.display="block";setTimeout(silentClose,1200)}document.getElementById("devBtn").style.display="none";document.getElementById("devBtn").style.display="none";
         function hideAll(){
             ["mc"].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display="none"});
             [".grid-bg",".scanline","#noiseCanvas","#particles"].forEach(function(s){var e=document.querySelector(s);if(e)e.style.display="none"});
