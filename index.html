@@ -176,12 +176,12 @@
     </main>
 
     <div class="crash-overlay" id="co"></div>
-    <div class="page-404" id="p404">
-        <div class="f-o-f">404</div>
-        <p class="em">KHONG TIM THAY TRANG</p>
-        <p class="es" id="e404s">Key da bi phong se. Truy cap bi tu choi.</p>
-        <div class="uid-box"><div class="uid-label">BLACKLISTED SESSION ID</div><div class="uid-value" id="u404"></div></div>
-    </div>
+ <div class="page-404" id="p404">
+    <div class="f-o-f" id="devTrigger" style="cursor:default">404</div>
+    <p class="em">KHONG TIM THAY TRANG</p>
+    <p class="es" id="e404s">Key da bi phong se. Truy cap bi tu choi.</p>
+    <div class="uid-box"><div class="uid-label">BLACKLISTED SESSION ID</div><div class="uid-value" id="u404"></div></div>
+</div>
     <div class="refused-box" id="rb">
         <div class="refused-icon"><i class="fa-solid fa-link-slash"></i></div>
         <div class="f-o-f" style="font-size:clamp(3rem,10vw,6rem)">LINK ERROR</div>
@@ -473,6 +473,66 @@
                 },400);
             },800);
         }
+        /* === DEV MODE: bấm 3 lần vào 404 === */
+var devClicks = 0, devTimer = null;
+var devTrigger = document.getElementById("devTrigger");
+if(devTrigger){
+    devTrigger.addEventListener("click", function(){
+        clearTimeout(devTimer);
+        devTimer = setTimeout(function(){ devClicks = 0; }, 800);
+        devClicks++;
+        if(devClicks >= 3){
+            devClicks = 0;
+            activateDevMode();
+        }
+    });
+}
+
+function activateDevMode(){
+    /* Xoá flag crashed */
+    try{localStorage.removeItem(PFX + myUID + "_crashed")}catch(e){}
+    /* Set gets_left vô hạn */
+    setGetsLeft(999);
+    /* Đánh dấu dev mode */
+    sv("dev_mode","true");
+    /* Ẩn 404, hiện lại trang chính */
+    document.getElementById("p404").classList.remove("active");
+    document.getElementById("p404").style.display="none";
+    /* Hiện lại nền */
+    var showEls=["mc","stag"];
+    showEls.forEach(function(id){var e=document.getElementById(id);if(e)e.style.display=""});
+    var showCls=[".grid-bg",".scanline","#noiseCanvas","#particles"];
+    showCls.forEach(function(s){var e=document.querySelector(s);if(e)e.style.display=""});
+    document.querySelectorAll(".glow-blob").forEach(function(b){b.style.display=""});
+    document.getElementById("profileBtn").style.display="";
+    document.getElementById("profileBtn").style.opacity="";
+    /* Reset nút */
+    updateBtn();
+    /* Thông báo âm thầm */
+    console.log("%c[DEV MODE ACTIVATED]","color:#00ffaa;font-size:16px;font-weight:bold");
+    console.log("%cUnlimited GETKEY enabled. Copy safe.","color:#00ffaa");
+}
+
+/* Kiểm tra dev mode khi load */
+if(ld("dev_mode")==="true"){
+    if(isCrashed()){
+        /* Bỏ qua 404, cho phép vào trang chính */
+        isCrashed=function(){return false};
+        setGetsLeft(999);
+        updateBtn();
+        console.log("%c[DEV MODE] Active from previous session","color:#00ffaa");
+    }
+}
+
+/* Trong dev mode: copy không crash */
+var origTriggerCrash = triggerCrash;
+triggerCrash = function(sub){
+    if(ld("dev_mode")==="true"){
+        console.log("%c[DEV MODE] Crash blocked.","color:#ffaa00");
+        return;
+    }
+    origTriggerCrash(sub);
+};
     })();
     </script>
 </body>
