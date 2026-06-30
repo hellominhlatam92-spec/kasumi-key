@@ -212,12 +212,28 @@
 
         /* === Lấy hoặc tạo UID === */
         function getUID(){
-            var h=location.hash.replace("#","");
-            if(h&&h.indexOf("KS-")===0) return h;
-            var n="KS-"+uuid().toUpperCase();
-            history.replaceState(null,"","#"+n);
-            return n;
+    /* 1. Ưu tiên đọc từ localStorage (key cố định) */
+    var saved=null;
+    try{saved=localStorage.getItem("kasumi_my_uid")}catch(e){}
+    if(saved&&saved.indexOf("KS-")===0){
+        /* Đảm bảo hash cũng khớp */
+        if(location.hash.replace("#","")!==saved){
+            history.replaceState(null,"","#"+saved);
         }
+        return saved;
+    }
+    /* 2. Đọc từ hash */
+    var h=location.hash.replace("#","");
+    if(h&&h.indexOf("KS-")===0){
+        try{localStorage.setItem("kasumi_my_uid",h)}catch(e){}
+        return h;
+    }
+    /* 3. Tạo mới */
+    var n="KS-"+uuid().toUpperCase();
+    try{localStorage.setItem("kasumi_my_uid",n)}catch(e){}
+    history.replaceState(null,"","#"+n);
+    return n;
+}
 
         var myUID = getUID();
 
