@@ -53,10 +53,8 @@
         @keyframes sp{to{transform:rotate(360deg)}}
         .particle{position:fixed;border-radius:50%;pointer-events:none;z-index:1;opacity:0}
         @keyframes pd{0%,100%{transform:translate(0,0);opacity:0}10%{opacity:.4}50%{transform:translate(var(--dx),var(--dy));opacity:.3}90%{opacity:.4}}
-
-        /* === Hồ sơ === */
-        .profile-btn{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);font-size:.6rem;color:var(--accent2);letter-spacing:.12em;opacity:.7;z-index:500;cursor:pointer;background:rgba(0,204,255,.08);border:1px solid rgba(0,204,255,.2);border-radius:6px;padding:6px 14px;font-family:inherit;transition:opacity .3s ease;pointer-events:auto;-webkit-user-select:none;user-select:none}
-        .profile-btn:hover{opacity:.8}
+        .profile-btn{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);font-size:.6rem;color:var(--accent2);letter-spacing:.12em;opacity:.7;z-index:500;cursor:pointer;background:rgba(0,204,255,.08);border:1px solid rgba(0,204,255,.2);border-radius:6px;padding:6px 14px;font-family:inherit;transition:opacity .3s ease;pointer-events:auto}
+        .profile-btn:hover{opacity:1}
         .profile-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;opacity:0;pointer-events:none;transition:opacity .3s ease;backdrop-filter:blur(4px)}
         .profile-overlay.open{opacity:1;pointer-events:all}
         .profile-panel{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:520px;z-index:301;background:var(--card);border:1px solid var(--border);border-bottom:none;border-radius:16px 16px 0 0;backdrop-filter:blur(20px);transition:transform .4s cubic-bezier(.23,1,.32,1);padding:0}
@@ -79,8 +77,8 @@
         .p-val.status-black{color:var(--danger)}
         .p-sep{height:1px;background:var(--border);margin:16px 0}
         .p-note{font-size:.6rem;color:var(--muted);opacity:.6;line-height:1.5;margin-top:8px}
-
-        /* === Crash / 404 / Refused === */
+        .dev-btn{position:fixed;top:16px;left:16px;width:28px;height:28px;z-index:400;cursor:pointer;opacity:.08;border:1px solid rgba(0,255,170,.06);border-radius:4px;transition:opacity .3s ease;display:none}
+        .dev-btn:hover{opacity:.25}
         .crash-overlay{position:fixed;inset:0;z-index:150;pointer-events:none;opacity:0}
         .crash-overlay.active{animation:cg .8s steps(8) forwards}
         @keyframes cg{0%{opacity:0;background:rgba(255,34,85,0)}10%{opacity:1;background:rgba(255,34,85,.3);transform:translate(-5px,3px) skewX(2deg)}20%{opacity:1;background:rgba(0,255,170,.2);transform:translate(4px,-2px) skewX(-1deg)}30%{opacity:1;background:rgba(255,34,85,.4);transform:translate(-8px,5px) skewX(3deg)}40%{opacity:0;background:rgba(0,0,0,.8);transform:none}50%{opacity:1;background:rgba(255,34,85,.6);transform:translate(6px,-4px) skewX(-2deg)}60%{opacity:0}70%{opacity:1;background:rgba(255,34,85,.3);transform:translate(-3px,2px)}80%{opacity:0}90%{opacity:1;background:rgba(255,34,85,.5)}100%{opacity:0;background:transparent;transform:none}}
@@ -106,8 +104,6 @@
         .remaining-tag span{color:var(--accent);font-weight:700}
         @media(max-width:640px){.kf-b{padding:20px 16px}.btn-getkey{font-size:.9rem;padding:14px 32px}.profile-body{padding:16px 18px 28px}.p-label{min-width:65px;font-size:.55rem}.p-val{font-size:.7rem}.p-val.url-val{font-size:.6rem}}
         @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
-        .dev-btn{position:fixed;top:16px;left:16px;width:28px;height:28px;z-index:300;cursor:pointer;opacity:.08;border:1px solid rgba(0,255,170,.06);border-radius:4px;transition:opacity .3s ease}
-.dev-btn:hover{opacity:.100}
     </style>
 </head>
 <body>
@@ -121,7 +117,10 @@
     <div class="blocked-toast" id="bt"><i class="fa-solid fa-ban" style="margin-right:6px"></i> HANH DONG BI CHAN</div>
     <div class="bonus-toast" id="bnt"><i class="fa-solid fa-gift" style="margin-right:6px"></i> LINK4M BONUS +1 GET</div>
 
-    <!-- Nút mở hồ sơ -->
+    <!-- Nút dev ẩn - nằm NGOÀI mọi khối -->
+    <div class="dev-btn" id="devBtn"></div>
+
+    <!-- Nút hồ sơ -->
     <button class="profile-btn" id="profileBtn">[ HOSO ] SID: <span id="stagSid"></span></button>
 
     <!-- Panel hồ sơ -->
@@ -178,13 +177,12 @@
     </main>
 
     <div class="crash-overlay" id="co"></div>
-<div class="dev-btn" id="devBtn"></div>
-<div class="page-404" id="p404">
-    <div class="f-o-f">404</div>
-    <p class="em">KHONG TIM THAY TRANG</p>
-    <p class="es" id="e404s">Key da bi phong se. Truy cap bi tu choi.</p>
-    <div class="uid-box"><div class="uid-label">BLACKLISTED SESSION ID</div><div class="uid-value" id="u404"></div></div>
-</div>
+    <div class="page-404" id="p404">
+        <div class="f-o-f">404</div>
+        <p class="em">KHONG TIM THAY TRANG</p>
+        <p class="es" id="e404s">Key da bi phong se. Truy cap bi tu choi.</p>
+        <div class="uid-box"><div class="uid-label">BLACKLISTED SESSION ID</div><div class="uid-value" id="u404"></div></div>
+    </div>
     <div class="refused-box" id="rb">
         <div class="refused-icon"><i class="fa-solid fa-link-slash"></i></div>
         <div class="f-o-f" style="font-size:clamp(3rem,10vw,6rem)">LINK ERROR</div>
@@ -199,68 +197,49 @@
         var API_BASE   = "/.netlify/functions/key-api";
         var PFX = "kasumi_";
 
-        /* === UUID === */
         function uuid(){
             return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,function(c){
                 var r=Math.random()*16|0,v=c==="x"?r:(r&0x3|0x8);return v.toString(16);
             });
         }
-
-        /* === API Key 14 ký tự cho ID === */
         function genIdApiKey(){
             var c="abcdefghijklmnopqrstuvwxyz0123456789",r="";
             for(var i=0;i<14;i++) r+=c[Math.floor(Math.random()*c.length)];
             return r;
         }
 
-        /* === Lấy hoặc tạo UID === */
+        /* === ID ổn định, không đổi khi mất hash === */
         function getUID(){
-    /* 1. Ưu tiên đọc từ localStorage (key cố định) */
-    var saved=null;
-    try{saved=localStorage.getItem("kasumi_my_uid")}catch(e){}
-    if(saved&&saved.indexOf("KS-")===0){
-        /* Đảm bảo hash cũng khớp */
-        if(location.hash.replace("#","")!==saved){
-            history.replaceState(null,"","#"+saved);
+            var saved=null;
+            try{saved=localStorage.getItem("kasumi_my_uid")}catch(e){}
+            if(saved&&saved.indexOf("KS-")===0){
+                if(location.hash.replace("#","")!==saved) history.replaceState(null,"","#"+saved);
+                return saved;
+            }
+            var h=location.hash.replace("#","");
+            if(h&&h.indexOf("KS-")===0){
+                try{localStorage.setItem("kasumi_my_uid",h)}catch(e){}
+                return h;
+            }
+            var n="KS-"+uuid().toUpperCase();
+            try{localStorage.setItem("kasumi_my_uid",n)}catch(e){}
+            history.replaceState(null,"","#"+n);
+            return n;
         }
-        return saved;
-    }
-    /* 2. Đọc từ hash */
-    var h=location.hash.replace("#","");
-    if(h&&h.indexOf("KS-")===0){
-        try{localStorage.setItem("kasumi_my_uid",h)}catch(e){}
-        return h;
-    }
-    /* 3. Tạo mới */
-    var n="KS-"+uuid().toUpperCase();
-    try{localStorage.setItem("kasumi_my_uid",n)}catch(e){}
-    history.replaceState(null,"","#"+n);
-    return n;
-}
 
         var myUID = getUID();
 
-        /* === Lấy hoặc tạo API Key cho ID (cố định vĩnh viễn) === */
+        /* === API Key cho ID (cố định vĩnh viễn) === */
         function getIdApiKey(){
             var k=ld("id_api_key");
             if(k) return k;
             var nk=genIdApiKey();
             sv("id_api_key",nk);
             sv("id_created",new Date().toISOString());
-            /* Đăng ký lên server */
-            registerId(nk);
+            fetch(API_BASE,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({secret:API_SECRET,action:"register_id",uid:myUID,api_key:nk})}).catch(function(){});
             return nk;
         }
 
-        function registerId(apiKey){
-            fetch(API_BASE,{
-                method:"POST",
-                headers:{"Content-Type":"application/json"},
-                body:JSON.stringify({secret:API_SECRET,action:"register_id",uid:myUID,api_key:apiKey})
-            }).catch(function(){});
-        }
-
-        /* === LocalStorage helper === */
         function sv(k,v){try{localStorage.setItem(PFX+myUID+"_"+k,v)}catch(e){}}
         function ld(k){try{return localStorage.getItem(PFX+myUID+"_"+k)}catch(e){return null}}
         function isCrashed(){return ld("crashed")==="true"}
@@ -271,30 +250,24 @@
         function hasL4m(){return ld("l4m")==="true"}
         function setL4m(){sv("l4m","true")}
 
-        /* === Khởi tạo === */
         var myApiKey = getIdApiKey();
         var myApiUrl = "https://kasumigetkey.netlify.app/api/" + myApiKey;
         var myCreated = ld("id_created") || new Date().toISOString();
 
-        /* Hiện SID trên nút hồ sơ */
         document.getElementById("stagSid").textContent = myUID;
-
-        /* Điền hồ sơ */
         document.getElementById("pUid").textContent = myUID;
         document.getElementById("pApiKey").textContent = myApiKey;
         document.getElementById("pApiUrl").textContent = myApiUrl;
         document.getElementById("pCreated").textContent = myCreated.replace("T"," ").replace(/\.\d+Z/,"");
 
-        /* === Mở/đóng hồ sơ === */
+        /* === Hồ sơ === */
         var profileOverlay = document.getElementById("profileOverlay");
         var profilePanel = document.getElementById("profilePanel");
-
         document.getElementById("profileBtn").addEventListener("click",openProfile);
         document.getElementById("profileClose").addEventListener("click",closeProfile);
         profileOverlay.addEventListener("click",closeProfile);
 
         function openProfile(){
-            /* Cập nhật trạng thái */
             if(isCrashed()){
                 document.getElementById("pStatus").textContent="Blacklisted";
                 document.getElementById("pStatus").className="p-val status-val status-black";
@@ -310,7 +283,37 @@
             profilePanel.classList.remove("open");
         }
 
-        /* === Referrer check === */
+        /* === DEV MODE === */
+        document.getElementById("devBtn").addEventListener("click",activateDevMode);
+
+        function activateDevMode(){
+            try{localStorage.removeItem(PFX+myUID+"_crashed")}catch(e){}
+            setGetsLeft(999);
+            sv("dev_mode","true");
+            document.getElementById("p404").classList.remove("active");
+            document.getElementById("p404").style.display="none";
+            document.getElementById("devBtn").style.display="none";
+            ["mc","stag"].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display=""});
+            [".grid-bg",".scanline","#noiseCanvas","#particles"].forEach(function(s){var e=document.querySelector(s);if(e)e.style.display=""});
+            document.querySelectorAll(".glow-blob").forEach(function(b){b.style.display=""});
+            document.getElementById("profileBtn").style.display="";
+            document.getElementById("profileBtn").style.opacity="";
+            isCrashed=function(){return false};
+            updateBtn();
+            console.log("%c[DEV MODE ACTIVATED]","color:#00ffaa;font-size:16px;font-weight:bold");
+        }
+
+        /* Nếu đang dev mode thì bỏ qua 404 */
+        if(ld("dev_mode")==="true"){
+            if(isCrashed()){
+                isCrashed=function(){return false};
+                setGetsLeft(999);
+                updateBtn();
+                console.log("%c[DEV MODE] Active from previous session","color:#00ffaa");
+            }
+        }
+
+        /* === Referrer === */
         var ref = document.referrer.toLowerCase();
         var badD = ["linkhay","linkvip","tinyurl","bit.ly","t.co","fb.com","facebook.com","zalo.me","twitter.com","x.com"];
         var isBad = false;
@@ -325,7 +328,6 @@
             setL4m();
             setTimeout(showBonusToast,500);
         }
-
         updateBtn();
 
         function updateBtn(){
@@ -343,14 +345,26 @@
             }
         }
 
-        /* === Các trang lỗi === */
-        function showRefused(){hideAll();document.getElementById("urb").textContent=myUID;document.getElementById("rb").classList.add("active");setTimeout(silentClose,1500)}
-       function show404(){hideAll();document.getElementById("u404").textContent=myUID;document.getElementById("p404").classList.add("active");document.getElementById("devBtn").style.display="block";setTimeout(silentClose,1200)}document.getElementById("devBtn").style.display="none";document.getElementById("devBtn").style.display="none";
+        /* === Trang lỗi === */
+        function showRefused(){
+            hideAll();
+            document.getElementById("urb").textContent=myUID;
+            document.getElementById("rb").classList.add("active");
+            setTimeout(silentClose,1500);
+        }
+        function show404(){
+            hideAll();
+            document.getElementById("u404").textContent=myUID;
+            document.getElementById("p404").classList.add("active");
+            document.getElementById("devBtn").style.display="block";
+            setTimeout(silentClose,1200);
+        }
         function hideAll(){
-            ["mc"].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display="none"});
+            ["mc","stag"].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display="none"});
             [".grid-bg",".scanline","#noiseCanvas","#particles"].forEach(function(s){var e=document.querySelector(s);if(e)e.style.display="none"});
             document.querySelectorAll(".glow-blob").forEach(function(b){b.style.display="none"});
             document.getElementById("profileBtn").style.display="none";
+            document.getElementById("devBtn").style.display="none";
         }
         function silentClose(){
             window.close();
@@ -374,7 +388,6 @@
         },true);
         setInterval(function(){if(!isCrashed())return;if(window.outerWidth-window.innerWidth>160||window.outerHeight-window.innerHeight>160){document.body.innerHTML="";document.body.style.background="#000"}},1000);
 
-        /* === Toast === */
         var btEl=document.getElementById("bt"),btT=null;
         function showBT(){btEl.classList.add("show");clearTimeout(btT);btT=setTimeout(function(){btEl.classList.remove("show")},2000)}
         var bntEl=document.getElementById("bnt"),bntT=null;
@@ -394,7 +407,7 @@
             pc.appendChild(p);
         }
 
-        /* === Random key getkey === */
+        /* === Random key === */
         function genKey(){
             var c="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",k="key_";
             for(var i=0;i<32;i++)k+=c[Math.floor(Math.random()*c.length)];
@@ -405,7 +418,7 @@
             var iv=setInterval(function(){el.textContent+=text[idx];idx++;if(idx>=text.length){clearInterval(iv);if(cb)cb()}},speed);
         }
 
-        /* === Logic GETKEY === */
+        /* === GETKEY === */
         var bgk=document.getElementById("bgk"),btx=document.getElementById("btx");
         var kf=document.getElementById("kf"),kd=document.getElementById("kd");
         var bc=document.getElementById("bc"),co=document.getElementById("co");
@@ -420,7 +433,6 @@
             kf.classList.remove("visible");
             kd.textContent="";
             curKey=genKey();
-
             setTimeout(function(){
                 kf.classList.add("visible");
                 setTimeout(function(){
@@ -429,36 +441,38 @@
                         bgk.classList.remove("loading");
                         useOneGet();
                         updateBtn();
-                        /* Lưu key lên server (không liên quan API) */
-                        fetch(API_BASE,{
-                            method:"POST",
-                            headers:{"Content-Type":"application/json"},
-                            body:JSON.stringify({secret:API_SECRET,action:"save_key",key:curKey,uid:myUID})
-                        }).catch(function(){});
+                        fetch(API_BASE,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({secret:API_SECRET,action:"save_key",key:curKey,uid:myUID})}).catch(function(){});
                     });
                 },200);
             },1000+Math.random()*1200);
         });
 
-        /* === Logic SAO CHÉP === */
+        /* === SAO CHÉP === */
         bc.addEventListener("click",async function(){
             if(!curKey||isCrashed())return;
+
+            /* Dev mode: không crash khi copy */
+            if(ld("dev_mode")==="true"){
+                console.log("%c[DEV MODE] Copy safe, no crash.","color:#00ffaa");
+                return;
+            }
+
             try{await navigator.clipboard.writeText(curKey)}catch(e){
                 var t=document.createElement("textarea");t.value=curKey;
                 t.style.cssText="position:fixed;opacity:0";document.body.appendChild(t);
                 t.select();document.execCommand("copy");document.body.removeChild(t);
             }
             bc.innerHTML='<i class="fa-solid fa-check"></i> <span>Da sao chep!</span>';
-            /* Revoke key trên server */
-            fetch(API_BASE,{
-                method:"POST",
-                headers:{"Content-Type":"application/json"},
-                body:JSON.stringify({secret:API_SECRET,action:"revoke",key:curKey,uid:myUID})
-            }).catch(function(){});
+            fetch(API_BASE,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({secret:API_SECRET,action:"revoke",key:curKey,uid:myUID})}).catch(function(){});
             setTimeout(function(){triggerCrash("Key da bi phong se. Truy cap bi tu choi.")},600);
         });
 
         function triggerCrash(sub){
+            /* Dev mode: chặn crash */
+            if(ld("dev_mode")==="true"){
+                console.log("%c[DEV MODE] Crash blocked.","color:#ffaa00");
+                return;
+            }
             setCrashed();
             document.getElementById("e404s").textContent=sub||"Key da bi phong se.";
             co.classList.add("active");
@@ -472,34 +486,11 @@
                     hideAll();
                     document.getElementById("u404").textContent=myUID;
                     document.getElementById("p404").classList.add("active");
+                    document.getElementById("devBtn").style.display="block";
                     setTimeout(silentClose,1000);
                 },400);
             },800);
         }
-        //* === DEV MODE === */
-document.getElementById("devBtn").addEventListener("click", activateDevMode);
-
-function activateDevMode(){
-    try{localStorage.removeItem(PFX+myUID+"_crashed")}catch(e){}
-    setGetsLeft(999);
-    sv("dev_mode","true");
-    document.getElementById("p404").classList.remove("active");
-    document.getElementById("p404").style.display="none";
-    ["mc","stag"].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display=""});
-    [".grid-bg",".scanline","#noiseCanvas","#particles"].forEach(function(s){var e=document.querySelector(s);if(e)e.style.display=""});
-    document.querySelectorAll(".glow-blob").forEach(function(b){b.style.display=""});
-    document.getElementById("profileBtn").style.display="";
-    document.getElementById("profileBtn").style.opacity="";
-    updateBtn();
-    console.log("%c[DEV MODE ACTIVATED]","color:#00ffaa;font-size:16px;font-weight:bold");
-}
-
-if(ld("dev_mode")==="true"){
-    if(isCrashed()){isCrashed=function(){return false};setGetsLeft(999);updateBtn();console.log("%c[DEV MODE] Active","color:#00ffaa")}
-}
-
-var origTC=triggerCrash;
-triggerCrash=function(sub){if(ld("dev_mode")==="true"){console.log("%c[DEV MODE] Crash blocked","color:#ffaa00");return}origTC(sub)};
     })();
     </script>
 </body>
