@@ -55,7 +55,7 @@
         @keyframes pd{0%,100%{transform:translate(0,0);opacity:0}10%{opacity:.4}50%{transform:translate(var(--dx),var(--dy));opacity:.3}90%{opacity:.4}}
 
         /* === Hồ sơ === */
-        .profile-btn{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);font-size:.6rem;color:var(--muted);letter-spacing:.12em;opacity:.35;z-index:10;cursor:pointer;background:none;border:none;font-family:inherit;transition:opacity .3s ease}
+        .profile-btn{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);font-size:.6rem;color:var(--accent2);letter-spacing:.12em;opacity:.7;z-index:500;cursor:pointer;background:rgba(0,204,255,.08);border:1px solid rgba(0,204,255,.2);border-radius:6px;padding:6px 14px;font-family:inherit;transition:opacity .3s ease;pointer-events:auto;-webkit-user-select:none;user-select:none}
         .profile-btn:hover{opacity:.8}
         .profile-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;opacity:0;pointer-events:none;transition:opacity .3s ease;backdrop-filter:blur(4px)}
         .profile-overlay.open{opacity:1;pointer-events:all}
