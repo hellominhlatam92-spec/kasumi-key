@@ -1,4 +1,4 @@
-const NPOINT_ID = "5d09d5f7bfe2604887875";
+const NPOINT_ID = "8df53dc9b1ae012ed416";
 const NPOINT_URL = "https://api.npoint.io/" + NPOINT_ID;
 const SECRET = "ks9x7mKp2qRw4nL";
 
